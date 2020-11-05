@@ -54,6 +54,7 @@ function FindBook({bookFacade}) {
   const [bookId, setBookId] = useState("");
   const [book, setBook] = useState([]); // could also have made this null, instead of an empty array, and then at book.length !== 0, replace to book (meaning if book is true/not null)
 
+  // could also just have used handleSubmit and handleChange like with deleteBook
   const findBook = () => { // could also have deleted by id, by taking id as parameter. see lars' code for it, min 3:24 https://www.youtube.com/watch?v=GC03omczhvA&list=PLDbigcKhXkiVB_v20ZaNGTn1LapfemChA&index=7
     const foundBook = bookFacade.findBook(bookId);
     setBook(foundBook);
