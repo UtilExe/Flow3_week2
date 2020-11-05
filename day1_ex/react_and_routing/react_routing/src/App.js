@@ -4,6 +4,7 @@ import {
   Route,
   Link,
   NavLink,
+  Prompt,
   useParams,
   useRouteMatch
 } from "react-router-dom";
@@ -14,8 +15,10 @@ import React, { useState } from "react";
 function AddBook({ bookFacade }) {
   const emptyBook = { id: "", title: "", info: "" }
   const [book, setBook] = useState({...emptyBook});
+  let [isBlocking, setIsBlocking] = useState(false);
 
   const handleChange = e => {
+    setIsBlocking(e.target.value.length > 0);
     const {id, value} = e.target;
     setBook({ ...book, [id]: value });
   };
@@ -23,6 +26,7 @@ function AddBook({ bookFacade }) {
   const handleSubmit = e => {
     e.preventDefault();
     bookFacade.addBook(book);
+    setIsBlocking(false);
     setBook({ ...emptyBook });
   };
 
@@ -33,6 +37,14 @@ function AddBook({ bookFacade }) {
         <input id="title" value={book.title} onChange={handleChange} type="text" placeholder="Add title" /> <br />
         <input id="info" value={book.info} onChange={handleChange} type="text" placeholder="Add info" />  <br />
         <input type="submit" onClick={handleSubmit} value="Save" />
+      
+      <Prompt
+        when={isBlocking}
+        message={location =>
+          `You have unsaved changes, are you sure you want to go to ${location.pathname}`
+        }
+      />
+     
       </form>
     </div>
   );
