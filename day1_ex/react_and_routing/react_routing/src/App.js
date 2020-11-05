@@ -6,7 +6,8 @@ import {
   NavLink,
   Prompt,
   useParams,
-  useRouteMatch
+  useRouteMatch,
+  useHistory
 } from "react-router-dom";
 //import bookFacade from "./bookFacade";
 import React, { useState } from "react";
@@ -15,12 +16,12 @@ import React, { useState } from "react";
 
 function AddBook({ bookFacade }) {
   const emptyBook = { id: "", title: "", info: "" }
-  const [book, setBook] = useState({...emptyBook});
+  const [book, setBook] = useState({ ...emptyBook });
   let [isBlocking, setIsBlocking] = useState(false);
 
   const handleChange = e => {
     setIsBlocking(e.target.value.length > 0);
-    const {id, value} = e.target;
+    const { id, value } = e.target;
     setBook({ ...book, [id]: value });
   };
 
@@ -38,20 +39,20 @@ function AddBook({ bookFacade }) {
         <input id="title" value={book.title} onChange={handleChange} type="text" placeholder="Add title" /> <br />
         <input id="info" value={book.info} onChange={handleChange} type="text" placeholder="Add info" />  <br />
         <input type="submit" onClick={handleSubmit} value="Save" />
-      
-      <Prompt
-        when={isBlocking}
-        message={location =>
-          `You have unsaved changes, are you sure you want to go to ${location.pathname}`
-        }
-      />
-     
+
+        <Prompt
+          when={isBlocking}
+          message={location =>
+            `You have unsaved changes, are you sure you want to go to ${location.pathname}`
+          }
+        />
+
       </form>
     </div>
   );
 }
 
-function FindBook({bookFacade}) {
+function FindBook({ bookFacade }) {
   const [bookId, setBookId] = useState("");
   const [book, setBook] = useState([]); // could also have made this null, instead of an empty array, and then at book.length !== 0, replace to book (meaning if book is true/not null)
 
@@ -67,37 +68,56 @@ function FindBook({bookFacade}) {
   }
   return (
     <div>
-       <input id="book-id"  type="text" placeholder="Enter book id" onChange={e => {setBookId(e.target.value)}}/>
-       <button onClick={findBook}>Find Book</button>
-       {book.length !== 0 ? (
-       <div>
-         <p>ID: {book.id}</p>
-         <p>Title: {book.title}</p>
-         <p>Info: {book.info}</p>
-         <div>
-           <button onClick={deleteBook}>Delete book</button>
-           </div>
-         </div> 
-         )
-         : <p>Enter id for book to view</p>
-        }
-         </div>
+      <input id="book-id" type="text" placeholder="Enter book id" onChange={e => { setBookId(e.target.value) }} />
+      <button onClick={findBook}>Find Book</button>
+      {book.length !== 0 ? (
+        <div>
+          <p>ID: {book.id}</p>
+          <p>Title: {book.title}</p>
+          <p>Info: {book.info}</p>
+          <div>
+            <button onClick={deleteBook}>Delete book</button>
+          </div>
+        </div>
+      )
+        : <p>Enter id for book to view</p>
+      }
+    </div>
   );
 }
 
 
-function Header() {
+function Header({ isLoggedIn, loginMsg }) {
   return (
     <div>
       <ul className="header">
         <li><NavLink exact activeClassName="active" to="/">Home</NavLink></li>
         <li><NavLink activeClassName="active" to="/products">Products</NavLink></li>
-        <li><NavLink activeClassName="active" to="/add-book">Add Book</NavLink></li>
-        <li><NavLink activeClassName="active" to="/find-book">Find Book</NavLink></li>
+
+        {isLoggedIn && (
+          <React.Fragment>
+            <li><NavLink activeClassName="active" to="/add-book">Add Book</NavLink></li>
+            <li><NavLink activeClassName="active" to="/find-book">Find Book</NavLink></li>
+          </React.Fragment>
+        )}
+        <li><NavLink activeClassName="active" to="/login-out">{loginMsg}</NavLink></li>
         <li><NavLink activeClassName="active" to="/company">Company</NavLink></li>
       </ul>
     </div>
   );
+}
+
+function Login({isLoggedIn, loginMsg, setLoginStatus}) {
+  const handleBtnClick = () => {
+    setLoginStatus(!isLoggedIn);
+  };
+  return (
+    <div>
+      <h2>{loginMsg}</h2>
+      <br/>
+      <button onClick={handleBtnClick}>{loginMsg}</button>
+    </div>
+  )
 }
 
 function Home() {
@@ -108,16 +128,16 @@ function Home() {
   );
 }
 
-function Details({bookFacade}) {
+function Details({ bookFacade }) {
   let { bookId } = useParams();
   const specificBook = bookFacade.findBook(bookId);
 
   return (
     <div>
-    <h2>Book details for selected book will go here:</h2>
-    <p>Book ID: {specificBook.id}</p>
-    <p>Book Title: {specificBook.title} </p>
-    <p>Book Info: {specificBook.info} </p>
+      <h2>Book details for selected book will go here:</h2>
+      <p>Book ID: {specificBook.id}</p>
+      <p>Book Title: {specificBook.title} </p>
+      <p>Book Info: {specificBook.info} </p>
     </div>
   )
 }
@@ -142,8 +162,8 @@ function Products({ bookFacade }) {
         <Route exact path={path}>
           <h3>Please select a book</h3>
         </Route>
-         <Route path={`${path}/:bookId`}>
-          <Details bookFacade={bookFacade}/>
+        <Route path={`${path}/:bookId`}>
+          <Details bookFacade={bookFacade} />
         </Route>
       </Switch>
     </div>
@@ -167,10 +187,21 @@ function NoMatch() {
 }
 
 function App({ bookFacade }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  let history = useHistory();
+
+  const setLoginStatus = status => {
+    setIsLoggedIn(status);
+    // vi ønsker efter at logge ind, at man skal komme til home, hvilket dette gør
+    history.push("/");
+  };
 
   return (
     <div className="App">
-      <Header />
+      <Header 
+      loginMsg={isLoggedIn ? "Logout" : "Login"}
+      isLoggedIn={isLoggedIn}
+      />
       <Switch>
         <Route exact path="/">
           <Home />
@@ -182,10 +213,17 @@ function App({ bookFacade }) {
           <Company />
         </Route>
         <Route path="/add-book">
-          <AddBook bookFacade={bookFacade}/>
+          <AddBook bookFacade={bookFacade} />
         </Route>
         <Route path="/find-book">
-          <FindBook bookFacade={bookFacade}/>
+          <FindBook bookFacade={bookFacade} />
+        </Route>
+        <Route path="/login-out">
+          <Login 
+          loginMsg={isLoggedIn ? "Logout" : "Login"}
+          isLoggedIn={isLoggedIn}
+          setLoginStatus={setLoginStatus}
+          />
         </Route>
         <Route>
           <NoMatch />
