@@ -50,6 +50,40 @@ function AddBook({ bookFacade }) {
   );
 }
 
+function FindBook({bookFacade}) {
+  const [bookId, setBookId] = useState("");
+  const [book, setBook] = useState([]); // could also have made this null, instead of an empty array, and then at book.length !== 0, replace to book (meaning if book is true/not null)
+
+  const findBook = () => { // could also have deleted by id, by taking id as parameter. see lars' code for it, min 3:24 https://www.youtube.com/watch?v=GC03omczhvA&list=PLDbigcKhXkiVB_v20ZaNGTn1LapfemChA&index=7
+    const foundBook = bookFacade.findBook(bookId);
+    setBook(foundBook);
+  };
+  const deleteBook = () => {
+    const foundBook = bookFacade.findBook(bookId);
+    bookFacade.deleteBook(foundBook);
+    setBook([]);
+  }
+  return (
+    <div>
+       <input id="book-id"  type="text" placeholder="Enter book id" onChange={e => {setBookId(e.target.value)}}/>
+       <button onClick={findBook}>Find Book</button>
+       {book.length !== 0 ? (
+       <div>
+         <p>ID: {book.id}</p>
+         <p>Title: {book.title}</p>
+         <p>Info: {book.info}</p>
+         <div>
+           <button onClick={deleteBook}>Delete book</button>
+           </div>
+         </div> 
+         )
+         : <p>Enter id for book to view</p>
+        }
+         </div>
+  );
+}
+
+
 function Header() {
   return (
     <div>
@@ -57,6 +91,7 @@ function Header() {
         <li><NavLink exact activeClassName="active" to="/">Home</NavLink></li>
         <li><NavLink activeClassName="active" to="/products">Products</NavLink></li>
         <li><NavLink activeClassName="active" to="/add-book">Add Book</NavLink></li>
+        <li><NavLink activeClassName="active" to="/find-book">Find Book</NavLink></li>
         <li><NavLink activeClassName="active" to="/company">Company</NavLink></li>
       </ul>
     </div>
@@ -146,6 +181,9 @@ function App({ bookFacade }) {
         </Route>
         <Route path="/add-book">
           <AddBook bookFacade={bookFacade}/>
+        </Route>
+        <Route path="/find-book">
+          <FindBook bookFacade={bookFacade}/>
         </Route>
         <Route>
           <NoMatch />
