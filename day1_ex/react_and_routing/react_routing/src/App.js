@@ -64,14 +64,25 @@ function Header() {
 }
 
 function Home() {
-
   return (
     <div>
       <h1>Home</h1>
     </div>
-
   );
+}
 
+function Details({bookFacade}) {
+  let { bookId } = useParams();
+  const specificBook = bookFacade.findBook(bookId);
+
+  return (
+    <div>
+    <h2>Book details for selected book will go here:</h2>
+    <p>Book ID: {specificBook.id}</p>
+    <p>Book Title: {specificBook.title} </p>
+    <p>Book Info: {specificBook.info} </p>
+    </div>
+  )
 }
 
 function Products({ bookFacade }) {
@@ -82,7 +93,7 @@ function Products({ bookFacade }) {
   const listItems = books.map(book => (
     <li key={book.id}>
       {book.title}
-
+      <Link to={`${url}/${book.id}`}> -Details</Link>
     </li>
   ))
 
@@ -90,6 +101,14 @@ function Products({ bookFacade }) {
     <div>
       <h1>Products</h1>
       {listItems}
+      <Switch>
+        <Route exact path={path}>
+          <h3>Please select a book</h3>
+        </Route>
+         <Route path={`${path}/:bookId`}>
+          <Details bookFacade={bookFacade}/>
+        </Route>
+      </Switch>
     </div>
   );
 }
