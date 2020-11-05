@@ -11,6 +11,7 @@ import {
 //import bookFacade from "./bookFacade";
 import React, { useState } from "react";
 
+// EDIT BOOK MISSING, RED TASK. Try to do it later if extra time.
 
 function AddBook({ bookFacade }) {
   const emptyBook = { id: "", title: "", info: "" }
