@@ -18,10 +18,9 @@ class TagHandler implements Callable<TagDTO> {
   @Override
   public TagDTO call() throws Exception {
     tc.doWork();
-    return new TagDTO(tc);
+    return new TagDTO(tc); 
   }
 }
-
 
 public class Tester {
 
@@ -32,7 +31,8 @@ public class Tester {
         urls.add(new TagCounter("https://politiken.dk"));
         urls.add(new TagCounter("https://cphbusiness.dk"));
         for (TagCounter tc : urls) {
-            tc.doWork();
+            tc.doWork(); // make external call. doWork metoden laver et netværkskald via. koden i doWork(). 
+            // i doWork() er det koden doc = Jsoup.connect(url).get(); som er det blokerende kald. 
         }
         return urls;
     }
@@ -47,17 +47,19 @@ public class Tester {
         
         List<TagDTO> tagDTOs = new ArrayList<>();
         
+        // Nødt til at have futures, for at kunne håndtere callables. 
+        // Vi har 4 ting vi skal parallere, og derfor skal det være i en Liste. 
         List<Future<TagDTO>> futures = new ArrayList<>();
         //Start alle tråde (Callables)
         for (TagCounter tc : urls) {
             TagHandler tagHandler = new TagHandler(tc);
-            Future<TagDTO> tag = es.submit(tagHandler);
+            Future<TagDTO> tag = es.submit(tagHandler); // når man kalder submit, så kører de på deres egen tråd. 
             futures.add(tag);
         }
         //Få resultater
         List<TagDTO> results = new ArrayList<>();
         for (Future<TagDTO> f : futures) {
-            //promise.then(res=> //do something)
+            //Det svarer til: promise.then(res=> //do something)
             results.add(f.get(10, TimeUnit.SECONDS));
         }
         return results;
