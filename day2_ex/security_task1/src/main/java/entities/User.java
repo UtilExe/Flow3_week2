@@ -51,13 +51,13 @@ public class User implements Serializable {
 
   //TODO Change when password is hashed
    public boolean verifyPassword(String pw){
-        return(pw.equals(userPass));
+        return (BCrypt.checkpw(pw, userPass));
     }
 
   public User(String userName, String userPass) {
     this.userName = userName;
-
-    this.userPass = userPass;
+    this.userPass = BCrypt.hashpw(userPass, BCrypt.gensalt(12)); // må ikke være for høj, for så bliver den ikke færdig fordi det er en langsom algoritme. 12 er fint. 
+    
   }
 
 
@@ -74,7 +74,7 @@ public class User implements Serializable {
   }
 
   public void setUserPass(String userPass) {
-    this.userPass = userPass;
+    this.userPass = BCrypt.hashpw(userPass, BCrypt.gensalt(12));
   }
 
   public List<Role> getRoleList() {
